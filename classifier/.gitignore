@@ -1,0 +1,11 @@
+/classifier/data
+/classifier/__pycache__
+/test/train
+/test/valid
+/test/log
+/test/__pycache__
+/data
+/env
+/venv
+/.idea
+.idea
