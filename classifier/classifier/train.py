@@ -11,16 +11,13 @@ def train(args):
         train_logger = tb.SummaryWriter(path.join(args.log_dir, 'train'))
         valid_logger = tb.SummaryWriter(path.join(args.log_dir, 'valid'))
 
-    """
-    Your code here, modify your HW1 code
-    
-    """
     import torch
 
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
     model = CNNClassifier().to(device)
     if args.continue_training:
+        print("loading from a saved model")
         model.load_state_dict(torch.load(path.join(path.dirname(path.abspath(__file__)), 'cnn.th')))
 
     optimizer = torch.optim.SGD(model.parameters(), lr=args.learning_rate, momentum=0.9)
@@ -31,6 +28,7 @@ def train(args):
 
     global_step = 0
     for epoch in range(args.num_epoch):
+        print(epoch)
         model.train()
         acc_vals = []
         for img, label in train_data:

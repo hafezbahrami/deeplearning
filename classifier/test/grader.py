@@ -199,7 +199,7 @@ def run():
     import argparse
 
     parser = argparse.ArgumentParser('Grade your assignment')
-    parser.add_argument('assignment', default='homework')
+    parser.add_argument('assignment', default='classifier')
     parser.add_argument('-v', '--verbose', action='store_true')
     args = parser.parse_args()
 

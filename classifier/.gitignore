@@ -1,4 +1,6 @@
 /classifier/data
+/test
+testtt
 /classifier/__pycache__
 /test/train
 /test/valid

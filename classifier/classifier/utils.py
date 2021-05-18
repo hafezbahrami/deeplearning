@@ -8,10 +8,6 @@ LABEL_NAMES = ['background', 'kart', 'pickup', 'nitro', 'bomb', 'projectile']
 
 class SuperTuxDataset(Dataset):
     def __init__(self, dataset_path):
-        """
-        Your code here
-        Hint: Use your solution (or the master solution) to HW1
-        """
         import csv
         from os import path
         self.data = []
