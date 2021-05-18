@@ -1,0 +1,17 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+/homework/data
+/homework/dense_data
+/homework/log
+/homework/__pycache__
+/grader/train
+/grader/valid
+/grader/log
+/grader/__pycache__
+/data
+/log
+/env
+/venv
+/ubenv
+/.idea
+.idea
