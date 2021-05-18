@@ -62,3 +62,18 @@ labeling. Here the fous is only to improve the accuracy of global labeling:
 
 !ls
 ```
+
+## Some expected results:
+
+It is expected the accuracy for training and test dataset should be similar below. As seen
+the accuracy (validation set) improved significantly by applyting data augmentation:
+![insert_pic](pics/accuracy.JPG)
+
+Also, since this is a model for multi-class (6 class of data for global labeling),
+confusion matrix is a tool that can help us how our classification works.
+In train.oy, a piece of code is impemented to show the confusion matrix, as below:
+![insert_pic](pics/confusion_matrix.JPG)
+
+Finally, apiece of code in train.py shows how an input image fortraining will change based 
+on transformations we apply to the image:
+![insert_pics](pics/transferred_image.JPG)  
