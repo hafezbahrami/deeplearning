@@ -18,8 +18,19 @@ The accuracy of a classifier (either CNN or FCN) will be improved by implementin
 5) Weight regularization
 6) Early stopping
 
-In global labeling, we could use the confusion matrix, but in semantic labeling we have to use
-IOU. In the picture below, we want to semantically label the lady's picture. We can 
+For the input normalization, we must do it within the __init__ method of our model, so every test
+or valid data gets the same input normalization, otherwise it will get messed up:
+
+```python
+def __init__(self, layers=[16, 32, 64, 128], n_output_channels=5, kernel_size=3, use_skip=True):
+    super().__init__()
+    self.input_mean = torch.Tensor([0.3521554, 0.30068502, 0.28527516])
+    self.input_std = torch.Tensor([0.18182722, 0.18656468, 0.15938024])
+```
+
+Similar to global labeling, we still use the confusion matrix (utils.py), but in 
+semantic labeling we have to use IOU to define average and global accuracy. In the 
+picture below, we want to semantically label the lady's picture. We can 
 see the actual vs the prediction. The following image shows the intersection versus
 the union that are used to define IOU (intersection over union). If IOU close to 1,
 then a good prediction:
@@ -131,18 +142,28 @@ predictions.
 
 ## 8 Some expected results:
 
-It is expected the accuracy for training and test dataset should be similar below. As seen
-the accuracy (validation set) improved significantly by applyting data augmentation:
-![insert_pic](pics/accuracy.JPG)
+Here the confusion matrix is defined for five classes that we are intending doing our
+semantic labeling in each picture.
+The average IOU (in the diagonal of the confusion matrix), and the subsequent average and global 
+accuracy is depicted below:
 
-Also, since this is a model for multi-class (6 class of data for global labeling),
-confusion matrix is a tool that can help us how our classification works.
-In train.oy, a piece of code is impemented to show the confusion matrix, as below:
-![insert_pic](pics/confusion_matrix.JPG)
+![insert_pic](pics/iou_measured.JPG)
 
-Finally, apiece of code in train.py shows how an input image fortraining will change based 
-on transformations we apply to the image:
-![insert_pics](pics/transferred_image.JPG)  
+![insert_pic](pics/avg_accuracy.JPG)
+
+![insert_pic](pics/global_accuracy.JPG)
+
+![insert_pic](pics/loss.JPG)
+
+And for the images, below shows the original image, the labeled image used for traning, and the last one shows
+the predicted semantic label for this picture.
+
+![insert_pic](pics/orig_image.JPG)
+
+![insert_pic](pics/labeled_image.JPG)
+
+![insert_pic](pics/predicted_lebel.JPG)
+
 
 
 # 8 Reference for Semantic Lableing

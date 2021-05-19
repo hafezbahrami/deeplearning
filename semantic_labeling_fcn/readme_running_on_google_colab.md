@@ -64,4 +64,4 @@ We can specify all the parameters specified in the [if __name__ == '__main__':] 
 # 6 run the test
 We can specify all the parameters specified in the [if __name__ == '__main__':] part of the train.py.
 ```python
-!python3 -m -m grader classifier -v
+!python3 -m test_classifier classifier -v
