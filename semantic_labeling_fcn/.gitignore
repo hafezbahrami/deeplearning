@@ -1,0 +1,14 @@
+/homework/data
+/homework/dense_data
+/homework/log
+/homework/__pycache__
+/grader/train
+/grader/valid
+/grader/log
+/grader/__pycache__
+/data
+/log
+/env
+/venv
+/.idea
+.idea
