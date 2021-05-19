@@ -19,9 +19,46 @@ detector will represent each object by a single point at its center. This point 
 easy to detect by a dense prediction network (FCN)
 
 
+## 1 How does the point-based object detection work
+The same network for semantic labeling can be used here. A dense heat map of object centers are predicted.
+This heat ma is one of two output of the network.
+
+Each local maxima in the heat map corresponds to a detected object. A method is used to detect these local 
+maxima.
+
+### peak detection in the the heat map
+This has been implemented in the extract_peak method in model.py.
+
+A peak in a heatmap is any point that is a local maxima in a certain (rectangular) neighborhood 
+(larger or equal to any neighboring point), and has a value above a certain threshold.
+
+This method returns a list of maxima in the form of  [(score, cx, cy), ...].
+
+Besides what is in "extract_peak" method, an alternative approach to get the local maxima is:
+```python
+def extract_peak(heatmap, max_pool_ks=7, min_score=-5, max_det=100):
+    max_pool = torch.nn.MaxPool2d(kernel_size=max_pool_ks, stride=1, padding=max_pool_ks//2) #, return_indices=True)
+    width = heatmap.size()[1]
+    max_val = max_pool(heatmap[None, None])
+    max_val = max_val.squeeze()
+
+    peaks_location = torch.logical_and( heatmap > min_score , heatmap >= max_val).float()
+    number_of_peaks = min( torch.sum(peaks_location.view(-1) > 0), max_det)
+    _, idx = torch.topk(peaks_location.view(-1), number_of_peaks)
+
+    cx = idx % width
+    cy = idx // width
+
+    score = torch.index_select(heatmap.view(-1), dim=0, index = idx)
+
+    peaks = zip( score.detach().cpu().numpy(), cx.detach().cpu().numpy(), cy.detach().cpu().numpy()   )
+
+    peaks_sorted_by_score = sorted(peaks, key=lambda tup: tup[0], reverse=True)
+    return peaks_sorted_by_score
+```
 
 
-## 1 Setting up the FCN model
+## 2 Setting up the FCN model
 Many techniques used in object detection and semantic segmentation still applies
 for FCN and object detections:
 
@@ -53,7 +90,7 @@ The one used here is depicted below:
 ![insert_pic](pics/FCN_my_note.jpg)
 
 
-## 2 The output of FCN model
+## 3 The output of FCN model
 For "Object as a Point" method of object detection, there will be two predicted 
 outputs from the FCN:
 
@@ -75,10 +112,10 @@ return self.classifier(z), self.size(z)
 ```
 
 
-## 3 Reduce over-fitting
+## 4 Reduce over-fitting
 Similar to a CNN, FCN uses similar techniques to reduce over-fitting issue:
 
-### 3-1 Data Augmentation
+### 4-1 Data Augmentation
 The following library can be used to augment the data (training images)
 ```python
 torchvision.transforms.Compose
@@ -109,13 +146,13 @@ As seen above, when reading the train data, we just need to pass the transfromat
 into our load_data method.
 
 
-### 3-2 mess up with the network
+### 4-2 mess up with the network
 ```python
 torch.nn.Dropout
 ```
 
 
-## 4 FCN training
+## 5 FCN training
 In object-detection FCN training, the DetectionSuperTuxDataset dataset is used. This is
 a training dataset that has pixel-level labels for images taken from SuperTux 
 computer-game. This dataset accepts a 
@@ -125,6 +162,12 @@ are provided that properly work with a pair of image and label in dense_transfor
 
 Since we predict both the heat-map and the size of the box around the box, we will define
 two losses for each output. 
+
+For detection, we predict a heat map for each pixel. It means each pixel has
+2 state (?). Binary Cross Entropy is used for this.
+
+For size of the box, since we can measure the distance of the label-box and the predicted-box,
+the L2 Mean Square Loss is being used. 
 
 ```python
 det_loss = torch.nn.BCEWithLogitsLoss(reduction='none')
@@ -141,7 +184,7 @@ loss_val = det_loss_val + size_loss_val * args.size_weight
 ```
 
 
-## 5 Source of semantic data for training
+## 6 Source of semantic data for training
 The following shows the location for training data for global labeling and dense
 labeling. Here the fous is only to improve the accuracy of global labeling:
 ```python
@@ -154,55 +197,14 @@ labeling. Here the fous is only to improve the accuracy of global labeling:
 !ls
 ```
 
-## 6 Focal loss
-Since the training set has a large class imbalance, it is easy to cheat in a pixel-wise
-accuracy metric. 
-In utils.py, the distribution of each class in the training dataset mentioned:
-```python
-DENSE_LABEL_NAMES = ['background', 'kart', 'track', 'bomb/projectile', 'pickup/nitro']
-# Distribution of classes on dense training set (background and track dominate (96%)
-DENSE_CLASS_DISTRIBUTION = [0.52683655, 0.02929112, 0.4352989, 0.0044619, 0.00411153]
-```
-As seen above, predicting only track and background gives a 96% accuracy. loss function
-is defined with the following weight:
+## 7 Some expected results:
 
-```python
-w = torch.as_tensor(DENSE_CLASS_DISTRIBUTION)**(-args.gamma)
-loss = torch.nn.CrossEntropyLoss(weight=w / w.mean()).to(device)
-```
+Two individual and the final mixed loss are:
 
-## 7 IOU (intersection over union)
-As seen above, loss might not be a good measure in an unbalanced semantic labeling.
-Additional measure for  the Intersection-over-Union (IOU) evaluation metric is provided.
-This is a standard semantic segmentation metric that penalizes largely imbalanced 
-predictions. 
+![insert_pic](pics/detection_loss.JPG)
 
-## 8 Some expected results:
+![insert_pic](pics/size_loss.JPG)
 
-Here the confusion matrix is defined for five classes that we are intending doing our
-semantic labeling in each picture.
-The average IOU (in the diagonal of the confusion matrix), and the subsequent average and global 
-accuracy is depicted below:
+![insert_pic](pics/overall_loss.JPG)
 
-![insert_pic](pics/iou_measured.JPG)
-
-![insert_pic](pics/avg_accuracy.JPG)
-
-![insert_pic](pics/global_accuracy.JPG)
-
-![insert_pic](pics/loss.JPG)
-
-And for the images, below shows the original image, the labeled image used for traning, and the last one shows
-the predicted semantic label for this picture.
-
-![insert_pic](pics/orig_image.JPG)
-
-![insert_pic](pics/labeled_image.JPG)
-
-![insert_pic](pics/predicted_lebel.JPG)
-
-
-
-# 8 Reference for Semantic Lableing
-https://www.jeremyjordan.me/evaluating-image-segmentation-models/
 

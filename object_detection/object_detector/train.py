@@ -36,6 +36,7 @@ def train(args):
 
     global_step = 0
     for epoch in range(args.num_epoch):
+        print(epoch)
         model.train()
 
         for img, gt_det, gt_size in train_data:
@@ -75,9 +76,9 @@ def log(logger, imgs, gt_det, det, global_step):
     det: predicted object-center heatmaps
     global_step: iteration
     """
-    logger.add_images('image', imgs[:16], global_step)
-    logger.add_images('label', gt_det[:16], global_step)
-    logger.add_images('pred', torch.sigmoid(det[:16]), global_step)
+    logger.add_images('image', imgs[:2], global_step)
+    logger.add_images('label', gt_det[:2], global_step)
+    logger.add_images('pred', torch.sigmoid(det[:2]), global_step)
 
 
 if __name__ == '__main__':

@@ -17,7 +17,7 @@ os.environ['REPO'] = 'deeplearning'
 
 !git clone https://$USER:$PASS@github.com/$USER/$REPO.git
 
-%cd deeplearning/classifier
+%cd deeplearning/object_detection
 ```
 
 # 3 Installing dependencies
