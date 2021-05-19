@@ -1,5 +1,14 @@
-# Fully Convolutional Network (FCN) & Semantic labeling
+# Semantic Labeling & Fully Convolutional Network (FCN)
 
+In semantic labeling, we are looking for a couple of objects/classes within every 
+image. Picture below shows how we can tag various objects within each image.
+
+![inser_image](pics/example_of_semantic_labeling.JPG)
+
+There is a difference (or similairty) between semantic labeling and instance labeling:
+![insert_image](pics/semantic_vs_instance_labeling.JPG)
+
+## 1 Accuracy in Semantic Labeling
 The accuracy of a classifier (either CNN or FCN) will be improved by implementing:
 
 1) Input normalization
@@ -9,9 +18,25 @@ The accuracy of a classifier (either CNN or FCN) will be improved by implementin
 5) Weight regularization
 6) Early stopping
 
-## 1 FCN
+In global labeling, we could use the confusion matrix, but in semantic labeling we have to use
+IOU. In the picture below, we want to semantically label the lady's picture. We can 
+see the actual vs the prediction. The following image shows the intersection versus
+the union that are used to define IOU (intersection over union). If IOU close to 1,
+then a good prediction:
+
+![insert_image](pics/IOU_1.JPG)
+
+![insert_image](pics/IOU_2.JPG)
+
+By using IOU concept, we can define a threshold below which we call if a false
+positive. In the picture below the threshold is set to 0.5:
+
+![insert_image](pics/IOU_3.JPG)
+
+
+## 2 Fully Convolutional Network (FCN)
 The goal is to achieve a high accuracy for a semantic (dense) labeling. 
-DFor FCN model only convolutional operators are used: pad all of them correctly and 
+For FCN model only convolutional operators are used: pad all of them correctly and 
 match strided operators with up-convolutions. Skip and residual connections are used.
 
 FCN handles an arbitrary input resolution and produces an output of the same shape as 
@@ -19,9 +44,10 @@ the input: using output_padding=1 if needed, or cropping the output if it is too
  
 
 
-## 2 Reduce overfitting
+## 3 Reduce over-fitting
+Similar to a CNN, FCN uses similar techniques to reduce over-fitting issue:
 
-### 2-1 Data Augmentation
+### 3-1 Data Augmentation
 The following library can be used to augment the data (training images)
 ```python
 torchvision.transforms.Compose
@@ -52,20 +78,22 @@ As seen above, when reading the train data, we just need to pass the transfromat
 into our load_data method.
 
 
-### 2-2 mess up with the network
+### 3-2 mess up with the network
 ```python
 torch.nn.Dropout
 ```
 
 
-## 3 FCN training
-In FCN traning, the DenseSuperTuxDataset dataset is used. This dataset accepts a 
+## 4 FCN training
+In FCN training, the DenseSuperTuxDataset dataset is used. This is a training dataset
+that has pixel-level labels for images taken from SuperTux computer-game. This dataset
+accepts a 
 data augmentation parameters transform. Most standard data augmentation in torchvision 
 do not directly apply to dense labeling tasks. A smaller subset of useful augmentations
 are provided that properly work with a pair of image and label in dense_transforms.py.
 
 
-## 4 data for training
+## 5 Source of semantic data for training
 The following shows the location for training data for global labeling and dense
 labeling. Here the fous is only to improve the accuracy of global labeling:
 ```python
@@ -78,7 +106,7 @@ labeling. Here the fous is only to improve the accuracy of global labeling:
 !ls
 ```
 
-## 5 Focal loss
+## 6 Focal loss
 Since the training set has a large class imbalance, it is easy to cheat in a pixel-wise
 accuracy metric. 
 In utils.py, the distribution of each class in the training dataset mentioned:
@@ -95,13 +123,13 @@ w = torch.as_tensor(DENSE_CLASS_DISTRIBUTION)**(-args.gamma)
 loss = torch.nn.CrossEntropyLoss(weight=w / w.mean()).to(device)
 ```
 
-## 6 IOU (intersection over union)
+## 7 IOU (intersection over union)
 As seen above, loss might not be a good measure in an unbalanced semantic labeling.
 Additional measure for  the Intersection-over-Union (IOU) evaluation metric is provided.
 This is a standard semantic segmentation metric that penalizes largely imbalanced 
 predictions. 
 
-## 7 Some expected results:
+## 8 Some expected results:
 
 It is expected the accuracy for training and test dataset should be similar below. As seen
 the accuracy (validation set) improved significantly by applyting data augmentation:
@@ -115,3 +143,8 @@ In train.oy, a piece of code is impemented to show the confusion matrix, as belo
 Finally, apiece of code in train.py shows how an input image fortraining will change based 
 on transformations we apply to the image:
 ![insert_pics](pics/transferred_image.JPG)  
+
+
+# 8 Reference for Semantic Lableing
+https://www.jeremyjordan.me/evaluating-image-segmentation-models/
+
