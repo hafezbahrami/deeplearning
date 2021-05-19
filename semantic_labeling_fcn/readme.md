@@ -53,7 +53,9 @@ match strided operators with up-convolutions. Skip and residual connections are 
 FCN handles an arbitrary input resolution and produces an output of the same shape as 
 the input: using output_padding=1 if needed, or cropping the output if it is too large.
  
+The one used here is depicted below:
 
+![insert_pic](pics/FCN_my_note.jpg)
 
 ## 3 Reduce over-fitting
 Similar to a CNN, FCN uses similar techniques to reduce over-fitting issue:
