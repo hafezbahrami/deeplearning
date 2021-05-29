@@ -53,22 +53,29 @@ class ToHeatmap(object):
         peak, size = detections_to_heatmap(dets, image.shape[1:], radius=self.radius)
         return image, peak, size
 
-
 def detections_to_heatmap(dets, shape, radius=2, device=None):
     with torch.no_grad():
         size = torch.zeros((2, shape[0], shape[1]), device=device)
         peak = torch.zeros((len(dets), shape[0], shape[1]), device=device)
         for i, det in enumerate(dets):
             if len(det):
-                det = torch.tensor(det.astype(float), dtype=torch.float32, device=device)
-                cx, cy = (det[:, 0] + det[:, 2] - 1) / 2, (det[:, 1] + det[:, 3] - 1) / 2
+                det = torch.tensor(det.astype(float), dtype=torch.float32, device=device) # det contains 4-ponit for boxes within an image
+                # Let's locate the boxes with the pixel of the input image. gx and gx will be non-zero at boxes' centers
+                cx, cy = (det[:, 0] + det[:, 2] - 1) / 2, (det[:, 1] + det[:, 3] - 1) / 2  # cx and cy stores the (x,y) centres of boxes
                 x = torch.arange(shape[1], dtype=cx.dtype, device=cx.device)
                 y = torch.arange(shape[0], dtype=cy.dtype, device=cy.device)
-                gx = (-((x[:, None] - cx[None, :]) / radius)**2).exp()
-                gy = (-((y[:, None] - cy[None, :]) / radius)**2).exp()
-                gaussian, id = (gx[None] * gy[:, None]).max(dim=-1)
-                mask = gaussian > peak.max(dim=0)[0]
-                det_size = (det[:, 2:] - det[:, :2]).T / 2
+                gx = (-((x[:, None] - cx[None, :]) / radius)**2).exp()  # gx is non-zero (or larger value) close to the x-centre of boxes
+                gy = (-((y[:, None] - cy[None, :]) / radius)**2).exp()  # gy is non-zero (or larger value) close to the y-centre of boxes
+                gaussian, id = (gx[None] * gy[:, None]).max(dim=-1) # image of x * y pixels, every x-value is multiplied to y-value
+                mask = gaussian > peak.max(dim=0)[0] # mask the boxes with non-zero values
+                det_size = (det[:, 2:] - det[:, :2]).T / 2 # (x_center, y_center) for each box
                 size[:, mask] = det_size[:, id[mask]]
                 peak[i] = gaussian
         return peak, size
+
+
+# test: let's assume a 10 x 5 pixel, and two boxes in it: one at (0,0)&(2,2) the other (7,2)&(9,4)
+# import numpy
+# two_boxes=[[[0,0,2,2], [7,0,9,4]]]
+# aa = detections_to_heatmap(numpy.array(two_boxes), torch.randn(5,10).shape, radius=0.2)
+# print(aa)

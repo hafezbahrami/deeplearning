@@ -19,6 +19,26 @@ def extract_peak(heatmap, max_pool_ks=7, min_score=-5, max_det=100):
     return [(float(s), int(l) % heatmap.size(1), int(l) // heatmap.size(1))
             for s, l in zip(score.cpu(), loc.cpu()) if s > min_score]
 
+    ## Another Method
+    # max_pool = torch.nn.MaxPool2d(kernel_size=max_pool_ks, stride=1, padding=max_pool_ks//2) #, return_indices=True)
+    # width = heatmap.size()[1]
+    # max_val = max_pool(heatmap[None, None])
+    # max_val = max_val.squeeze()
+    #
+    # peaks_location = torch.logical_and( heatmap > min_score , heatmap >= max_val).float()
+    # number_of_peaks = min( torch.sum(peaks_location.view(-1) > 0), max_det)
+    # _, idx = torch.topk(peaks_location.view(-1), number_of_peaks)
+    #
+    # cx = idx % width
+    # cy = idx // width
+    #
+    # score = torch.index_select(heatmap.view(-1), dim=0, index = idx)
+    #
+    # peaks = zip( score.detach().cpu().numpy(), cx.detach().cpu().numpy(), cy.detach().cpu().numpy()   )
+    #
+    # peaks_sorted_by_score = sorted(peaks, key=lambda tup: tup[0], reverse=True)
+    # return peaks_sorted_by_score
+
 
 class Detector(torch.nn.Module):
     class Block(torch.nn.Module):
@@ -66,8 +86,9 @@ class Detector(torch.nn.Module):
             c = l
             if self.use_skip:
                 c += skip_layer_size[i]
-        self.classifier = torch.nn.Conv2d(c, n_class, 1)
-        self.size = torch.nn.Conv2d(c, 2, 1)
+        self.classifier = torch.nn.Conv2d(c, n_class, 1) # predicted heatmap for 3 classe (each class in one channel)
+        self.size = torch.nn.Conv2d(c, 2, 1)    # number of channgels is 2, since the regressor has 2 channels one for height
+                                                # of the bixes and one for the width of the boxes
 
     def forward(self, x):
         """

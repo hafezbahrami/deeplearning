@@ -39,6 +39,7 @@ def train(args):
         print(epoch)
         model.train()
 
+        # for img, hm, sizes in train_data:
         for img, gt_det, gt_size in train_data:
             img, gt_det, gt_size = img.to(device), gt_det.to(device), gt_size.to(device)
 

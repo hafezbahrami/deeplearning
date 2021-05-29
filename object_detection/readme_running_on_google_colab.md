@@ -7,7 +7,7 @@ import torch
 print(torch.cuda.is_available())
 ```
 
-# 2 Cyncing to the Git Hub repo
+# 2 Cync'ing to the Git Hub repo
 ```python
 import os
 
@@ -58,10 +58,10 @@ The other point is that is the data is on google drive, replace "wget" command w
 # 6 run the code
 We can specify all the parameters specified in the [if __name__ == '__main__':] part of the train.py.
 ```python
-!python3 -m classifier.train --log_dir .
+!python3 -m object_detector.train --log_dir .
 ```
 
 # 6 run the test
 We can specify all the parameters specified in the [if __name__ == '__main__':] part of the train.py.
 ```python
-!python3 -m test_classifier classifier -v
+!python3 -m test_object_detector object_detector -v

@@ -207,4 +207,11 @@ Two individual and the final mixed loss are:
 
 ![insert_pic](pics/overall_loss.JPG)
 
+Also, the following shows two original images, first. Then, the objects in these 2 images, and the last
+picture is the objects predicted in these 2 images.
 
+![insert_pic](pics/orig_image.JPG)
+
+![insert_pic](pics/objects_in_training_image.JPG)
+
+![insert_pic](pics/predcited_image.JPG) 
