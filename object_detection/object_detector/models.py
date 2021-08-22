@@ -67,7 +67,7 @@ class Detector(torch.nn.Module):
 
     def __init__(self, layers=[16, 32, 64, 128], n_class=3, kernel_size=3, use_skip=True):
         """
-           Setup your detection network
+           Setup the detection network
         """
         super().__init__()
         self.input_mean = torch.Tensor([0.3521554, 0.30068502, 0.28527516])

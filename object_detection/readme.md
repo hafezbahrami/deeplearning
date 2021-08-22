@@ -3,7 +3,7 @@
 In global labeling, we label every image with one label.
 
 In semantic labeling, we will have several classes within one image, such as 
-humna, animal, sky, background. But we do not distinguish between different animal 
+human, animal, sky, background. But we do not distinguish between different animal 
 within one image and we label them all as "animal".
 
 In object detection, we are looking for specific object, and similar to semantic labeling,
@@ -21,7 +21,7 @@ easy to detect by a dense prediction network (FCN)
 
 ## 1 How does the point-based object detection work
 The same network for semantic labeling can be used here. A dense heat map of object centers are predicted.
-This heat ma is one of two output of the network.
+This heat map is one of two output of the network.
 
 Each local maxima in the heat map corresponds to a detected object. A method is used to detect these local 
 maxima.
